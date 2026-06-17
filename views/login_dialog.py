@@ -1,12 +1,11 @@
 # views/login_dialog.py
-# 登录对话框
 import hashlib
 from PyQt5.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
-    QComboBox, QPushButton, QMessageBox, QFrame
+    QDialog, QVBoxLayout, QLabel, QLineEdit,
+    QPushButton, QMessageBox
 )
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont, QPixmap, QPalette, QColor
+from PyQt5.QtGui import QFont
 from db.connection import db
 
 
@@ -16,7 +15,7 @@ class LoginDialog(QDialog):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("医院病房管理系统 - 登录")
-        self.setFixedSize(420, 380)
+        self.setFixedSize(420, 400)
         self.setWindowFlags(Qt.Dialog | Qt.WindowCloseButtonHint)
         self.logged_in_user = None
 
@@ -31,7 +30,7 @@ class LoginDialog(QDialog):
                 color: #2c3e50;
             }
             QLineEdit {
-                padding: 10px 14px;
+                padding: 6px 12px;
                 border: 2px solid #dcdde1;
                 border-radius: 6px;
                 font-size: 14px;
@@ -40,17 +39,10 @@ class LoginDialog(QDialog):
             QLineEdit:focus {
                 border-color: #3498db;
             }
-            QComboBox {
-                padding: 10px 14px;
-                border: 2px solid #dcdde1;
-                border-radius: 6px;
-                font-size: 14px;
-                background: white;
-            }
             QPushButton#login_btn {
                 background-color: #3498db;
                 color: white;
-                padding: 12px;
+                padding: 8px 12px;
                 font-size: 16px;
                 font-weight: bold;
                 border-radius: 6px;
@@ -69,13 +61,11 @@ class LoginDialog(QDialog):
         layout.setSpacing(15)
         layout.setContentsMargins(50, 30, 50, 30)
 
-        # 标题
         title = QLabel("医院病房管理系统")
         title.setObjectName("title")
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
 
-        # 图标占位
         icon_label = QLabel("🏥")
         icon_label.setFont(QFont("Segoe UI Emoji", 48))
         icon_label.setAlignment(Qt.AlignCenter)
@@ -83,37 +73,34 @@ class LoginDialog(QDialog):
 
         layout.addSpacing(5)
 
-        # 用户名
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText("请输入用户名")
+        self.username_input.setFixedHeight(42)
         layout.addWidget(QLabel("用户名:"))
         layout.addWidget(self.username_input)
 
-        # 密码
         self.password_input = QLineEdit()
         self.password_input.setPlaceholderText("请输入密码")
         self.password_input.setEchoMode(QLineEdit.Password)
+        self.password_input.setFixedHeight(42)
         layout.addWidget(QLabel("密码:"))
         layout.addWidget(self.password_input)
 
-        # 登录按钮
-        self.login_btn = QPushButton("登  录")
+        self.login_btn = QPushButton("登 录")
         self.login_btn.setObjectName("login_btn")
+        self.login_btn.setFixedHeight(44)
         self.login_btn.clicked.connect(self._do_login)
         layout.addWidget(self.login_btn)
 
-        # 提示
         hint = QLabel("默认账号: admin | doctor1 | nurse1 | cashier1\n默认密码: admin123 / 123456")
         hint.setFont(QFont("Microsoft YaHei", 9))
         hint.setStyleSheet("color: #95a5a6;")
         hint.setAlignment(Qt.AlignCenter)
         layout.addWidget(hint)
 
-        # 回车键触发登录
         self.username_input.returnPressed.connect(self._do_login)
         self.password_input.returnPressed.connect(self._do_login)
 
-        # 默认焦点
         self.username_input.setFocus()
 
     def _do_login(self):
