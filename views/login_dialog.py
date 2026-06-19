@@ -2,7 +2,7 @@
 import hashlib
 from PyQt5.QtWidgets import (
     QDialog, QVBoxLayout, QLabel, QLineEdit,
-    QPushButton, QMessageBox
+    QPushButton, QMessageBox, QSizePolicy
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
@@ -15,25 +15,62 @@ class LoginDialog(QDialog):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("医院病房管理系统 - 登录")
-        self.setFixedSize(420, 400)
+        self.resize(680, 620)
+        self.setMinimumSize(340, 340)
         self.setWindowFlags(Qt.Dialog | Qt.WindowCloseButtonHint)
         self.logged_in_user = None
 
         self._init_ui()
+        self._apply_responsive_sizes()
+
+    def _scale_value(self, base_value, scale):
+        return max(1, int(round(base_value * scale)))
+
+    def _current_scale(self):
+        width_scale = self.width() / 420
+        height_scale = self.height() / 400
+        return max(0.82, min(width_scale, height_scale, 1.75))
+
+    def _apply_responsive_sizes(self):
+        scale = self._current_scale()
+
+        self.layout.setSpacing(self._scale_value(15, scale))
+        self.layout.setContentsMargins(
+            self._scale_value(50, scale),
+            self._scale_value(30, scale),
+            self._scale_value(50, scale),
+            self._scale_value(30, scale),
+        )
+        self.icon_label.setFont(QFont("Segoe UI Emoji", self._scale_value(48, scale)))
+        self.hint.setFont(QFont("Microsoft YaHei", self._scale_value(9, scale)))
+        self.username_label.setFont(QFont("Microsoft YaHei", self._scale_value(13, scale)))
+        self.password_label.setFont(QFont("Microsoft YaHei", self._scale_value(13, scale)))
+        self.username_input.setFixedHeight(self._scale_value(42, scale))
+        self.password_input.setFixedHeight(self._scale_value(42, scale))
+        self.login_btn.setFixedHeight(self._scale_value(44, scale))
+
         self.setStyleSheet("""
             QDialog {
                 background-color: #f5f6fa;
             }
             QLabel#title {
-                font-size: 22px;
+                font-size: %dpx;
                 font-weight: bold;
                 color: #2c3e50;
             }
+            QLabel#field_label {
+                font-size: %dpx;
+                color: #2c3e50;
+            }
+            QLabel#hint {
+                font-size: %dpx;
+                color: #95a5a6;
+            }
             QLineEdit {
-                padding: 6px 12px;
+                padding: %dpx %dpx;
                 border: 2px solid #dcdde1;
                 border-radius: 6px;
-                font-size: 14px;
+                font-size: %dpx;
                 background: white;
             }
             QLineEdit:focus {
@@ -42,8 +79,8 @@ class LoginDialog(QDialog):
             QPushButton#login_btn {
                 background-color: #3498db;
                 color: white;
-                padding: 8px 12px;
-                font-size: 16px;
+                padding: %dpx %dpx;
+                font-size: %dpx;
                 font-weight: bold;
                 border-radius: 6px;
                 border: none;
@@ -54,49 +91,73 @@ class LoginDialog(QDialog):
             QPushButton#login_btn:pressed {
                 background-color: #2471a3;
             }
-        """)
+        """ % (
+            self._scale_value(22, scale),
+            self._scale_value(13, scale),
+            self._scale_value(9, scale),
+            self._scale_value(6, scale),
+            self._scale_value(12, scale),
+            self._scale_value(14, scale),
+            self._scale_value(8, scale),
+            self._scale_value(12, scale),
+            self._scale_value(16, scale),
+        ))
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._apply_responsive_sizes()
 
     def _init_ui(self):
-        layout = QVBoxLayout(self)
-        layout.setSpacing(15)
-        layout.setContentsMargins(50, 30, 50, 30)
+        self.layout = QVBoxLayout(self)
+        self.layout.setSpacing(15)
+        self.layout.setContentsMargins(50, 30, 50, 30)
 
         title = QLabel("医院病房管理系统")
         title.setObjectName("title")
         title.setAlignment(Qt.AlignCenter)
-        layout.addWidget(title)
+        self.title = title
+        self.layout.addWidget(title)
 
         icon_label = QLabel("🏥")
         icon_label.setFont(QFont("Segoe UI Emoji", 48))
         icon_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(icon_label)
+        self.icon_label = icon_label
+        self.layout.addWidget(icon_label)
 
-        layout.addSpacing(5)
+        self.layout.addSpacing(5)
 
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText("请输入用户名")
         self.username_input.setFixedHeight(42)
-        layout.addWidget(QLabel("用户名:"))
-        layout.addWidget(self.username_input)
+        self.username_input.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.username_label = QLabel("用户名:")
+        self.username_label.setObjectName("field_label")
+        self.layout.addWidget(self.username_label)
+        self.layout.addWidget(self.username_input)
 
         self.password_input = QLineEdit()
         self.password_input.setPlaceholderText("请输入密码")
         self.password_input.setEchoMode(QLineEdit.Password)
         self.password_input.setFixedHeight(42)
-        layout.addWidget(QLabel("密码:"))
-        layout.addWidget(self.password_input)
+        self.password_input.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.password_label = QLabel("密码:")
+        self.password_label.setObjectName("field_label")
+        self.layout.addWidget(self.password_label)
+        self.layout.addWidget(self.password_input)
 
         self.login_btn = QPushButton("登 录")
         self.login_btn.setObjectName("login_btn")
         self.login_btn.setFixedHeight(44)
+        self.login_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.login_btn.clicked.connect(self._do_login)
-        layout.addWidget(self.login_btn)
+        self.layout.addWidget(self.login_btn)
 
         hint = QLabel("默认账号: admin | doctor1 | nurse1 | cashier1\n默认密码: admin123 / 123456")
+        hint.setObjectName("hint")
         hint.setFont(QFont("Microsoft YaHei", 9))
-        hint.setStyleSheet("color: #95a5a6;")
         hint.setAlignment(Qt.AlignCenter)
-        layout.addWidget(hint)
+        self.hint = hint
+        self.layout.addWidget(hint)
 
         self.username_input.returnPressed.connect(self._do_login)
         self.password_input.returnPressed.connect(self._do_login)

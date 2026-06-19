@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QIcon, QColor
+from utils.responsive import ResponsiveScaler
 
 
 class MainWindow(QMainWindow):
@@ -16,7 +17,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("医院病房管理系统")
-        self.setMinimumSize(1200, 750)
+        self.resize(1200, 750)
+        self.setMinimumSize(900, 560)
         self.setStyleSheet("""
             QMainWindow {
                 background-color: #f0f2f5;
@@ -40,6 +42,66 @@ class MainWindow(QMainWindow):
             QListWidget::item:hover {
                 background-color: #34495e;
             }
+            QWidget {
+                font-size: 13px;
+            }
+            QLabel {
+                font-size: 13px;
+            }
+            QGroupBox {
+                font-size: 14px;
+                font-weight: bold;
+                color: #2c3e50;
+                border: 1px solid #bdc3c7;
+                border-radius: 6px;
+                margin-top: 12px;
+                padding-top: 20px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 12px;
+                padding: 0 8px;
+            }
+            QLineEdit, QComboBox, QDateEdit, QSpinBox, QDoubleSpinBox {
+                padding: 6px 10px;
+                border: 1px solid #bdc3c7;
+                border-radius: 4px;
+                font-size: 13px;
+                min-height: 24px;
+            }
+            QTextEdit {
+                padding: 6px 10px;
+                border: 1px solid #bdc3c7;
+                border-radius: 4px;
+                font-size: 13px;
+            }
+            QLineEdit:focus, QComboBox:focus, QDateEdit:focus,
+            QSpinBox:focus, QDoubleSpinBox:focus, QTextEdit:focus {
+                border-color: #3498db;
+            }
+            QPushButton {
+                padding: 8px 16px;
+                font-size: 13px;
+                border-radius: 4px;
+                min-height: 24px;
+            }
+            QTableWidget {
+                font-size: 13px;
+                gridline-color: #ddd;
+                selection-background-color: #3498db;
+                selection-color: white;
+            }
+            QTableWidget::item {
+                padding: 6px;
+            }
+            QHeaderView::section {
+                background-color: #2c3e50;
+                color: white;
+                padding: 8px;
+                font-weight: bold;
+                font-size: 13px;
+                border: none;
+            }
         """)
 
         # 先检查数据库连接
@@ -52,6 +114,13 @@ class MainWindow(QMainWindow):
             self.DB_CONNECTED = False
 
         self._init_ui()
+        self.responsive_scaler = ResponsiveScaler(self, base_size=(1200, 750), min_scale=0.75, max_scale=1.6)
+        self.responsive_scaler.apply()
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if hasattr(self, "responsive_scaler"):
+            self.responsive_scaler.apply()
 
     def _init_ui(self):
         central = QWidget()
